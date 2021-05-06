@@ -22,6 +22,16 @@ let init = (app) => {
         return a;
     };
 
+    // This decorates the rows (e.g. that come from the server)
+    // adding information on their state:
+    // - clean: read-only, the value is saved on the server
+    // - edit : the value is being edited
+    // - pending : a save is pending.
+    app.decorate = (a) => {
+        a.map((e) => {e._state = {first_name: "clean", last_name: "clean"} ;});
+        return a;
+    }
+
     app.add_contact = function () {
         axios.post(add_contact_url,
             {
@@ -32,6 +42,7 @@ let init = (app) => {
                 id: response.data.id,
                 first_name: app.vue.add_first_name,
                 last_name: app.vue.add_last_name,
+                _state: {first_name: "clean", last_name: "clean"},
             });
             app.enumerate(app.vue.rows);
             app.reset_form();
@@ -61,12 +72,34 @@ let init = (app) => {
         app.vue.add_mode = new_status;
     };
 
+    app.start_edit = function (row_idx, fn) {
+        app.vue.rows[row_idx]._state[fn] = "edit";
+    };
+
+    app.stop_edit = function (row_idx, fn) {
+        let row = app.vue.rows[row_idx];
+        if (row._state[fn] === "edit") {
+            row._state[fn] = "pending";
+            axios.post(edit_contact_url,
+                {
+                    id: row.id,
+                    field: fn,
+                    value: row[fn], // row.first_name
+                }).then(function (result) {
+                row._state[fn] = "clean";
+            });
+        }
+        // If I was not editing, there is nothing that needs saving.
+    }
+
     // We form the dictionary of all methods, so we can assign them
     // to the Vue app in a single blow.
     app.methods = {
         add_contact: app.add_contact,
         set_add_status: app.set_add_status,
         delete_contact: app.delete_contact,
+        start_edit: app.start_edit,
+        stop_edit: app.stop_edit,
     };
 
     // This creates the Vue instance.
@@ -82,7 +115,7 @@ let init = (app) => {
     // For the moment, we 'load' the data from a string.
     app.init = () => {
         axios.get(load_contacts_url).then(function (response) {
-            app.vue.rows = app.enumerate(response.data.rows);
+            app.vue.rows = app.decorate(app.enumerate(response.data.rows));
         });
     };
 

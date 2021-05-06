@@ -44,8 +44,19 @@
         <th></th>
       </tr>
       <tr v-for="r in rows">
-        <td>{{r.first_name}}</td>
-        <td>{{r.last_name}}</td>
+        <td v-for="fn in ['first_name', 'last_name']">
+          <div class="control" :class="{'is-loading': r._state[fn] === 'pending'}" >
+            <input type="text" class="input" v-model="r[fn]"
+              :class="{
+                'is-focused': r._state[fn] === 'edit',
+                'is-static': r._state[fn] === 'clean',
+              }"
+              :readonly="r._state[fn] === 'clean'"
+              @click="start_edit(r._idx, fn)"
+              @blur="stop_edit(r._idx, fn)"
+            />
+          </div>
+        </td>
         <td><button @click="delete_contact(r._idx)" class="button is-danger">
           <i class="fa fa-trash"></i></button></td>
       </tr>
@@ -64,6 +75,7 @@
   let load_contacts_url = "[[=XML(load_contacts_url)]]";
   let add_contact_url = "[[=XML(add_contact_url)]]";
   let delete_contact_url = "[[=XML(delete_contact_url)]]";
+  let edit_contact_url = "[[=XML(edit_contact_url)]]";
 </script>
 <script src="js/index.js"></script>
 [[end]]

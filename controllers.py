@@ -25,6 +25,8 @@ session, db, T, auth, and tempates are examples of Fixtures.
 Warning: Fixtures MUST be declared with @action.uses({fixtures}) else your app will result in undefined behavior
 """
 
+import time
+
 from py4web import action, request, abort, redirect, URL
 from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
@@ -41,6 +43,7 @@ def index():
         load_contacts_url = URL('load_contacts', signer=url_signer),
         add_contact_url = URL('add_contact', signer=url_signer),
         delete_contact_url = URL('delete_contact', signer=url_signer),
+        edit_contact_url = URL('edit_contact', signer=url_signer),
     )
 
 # This is our very first API function.
@@ -67,4 +70,13 @@ def delete_contact():
     db(db.contact.id == id).delete()
     return "ok"
 
-
+@action('edit_contact', method="POST")
+@action.uses(url_signer.verify(), db)
+def edit_contact():
+    # Updates the db record.
+    id = request.json.get("id")
+    field = request.json.get("field")
+    value = request.json.get("value")
+    db(db.contact.id == id).update(**{field: value})
+    time.sleep(1) # debugging
+    return "ok"
