@@ -39,11 +39,34 @@
     <h1 class="title">Contacts</h1>
     <table class="table is-striped is-fullwidth">
       <tr>
+        <th></th>
         <th>First Name</th>
         <th>Last Name</th>
         <th></th>
       </tr>
       <tr v-for="r in rows">
+        <td>
+
+          <div v-if="!r.thumbnail">
+            <p class="control">
+              <div class="file is-info">
+                <label class="file-label">
+                  <input class="file-input" type="file"
+                         accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
+                         @change="upload_file($event, r._idx)">
+                  <span class="file-cta">
+                    <span class="file-label">
+                      <span><i class="fa fa-upload"></i></span>
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </p>
+          </div>
+
+          <img v-if="r.thumbnail" width="50" :src="r.thumbnail" />
+
+        </td>
         <td v-for="fn in ['first_name', 'last_name']">
           <div class="control" :class="{'is-loading': r._state[fn] === 'pending'}" >
             <input type="text" class="input" v-model="r[fn]"
@@ -76,6 +99,7 @@
   let add_contact_url = "[[=XML(add_contact_url)]]";
   let delete_contact_url = "[[=XML(delete_contact_url)]]";
   let edit_contact_url = "[[=XML(edit_contact_url)]]";
+  let upload_thumbnail_url = "[[=XML(upload_thumbnail_url)]]";
 </script>
 <script src="js/index.js"></script>
 [[end]]

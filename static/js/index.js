@@ -38,13 +38,16 @@ let init = (app) => {
                 first_name: app.vue.add_first_name,
                 last_name: app.vue.add_last_name,
             }).then(function (response) {
-            app.vue.rows.push({
+            let n = app.vue.rows.length;
+            app.vue.rows.push();
+            let new_row = {
                 id: response.data.id,
                 first_name: app.vue.add_first_name,
                 last_name: app.vue.add_last_name,
                 _state: {first_name: "clean", last_name: "clean"},
-            });
-            app.enumerate(app.vue.rows);
+                _idx: n,
+            };
+            app.vue.rows[n] = new_row;
             app.reset_form();
             app.set_add_status(false);
         });
@@ -73,6 +76,7 @@ let init = (app) => {
     };
 
     app.start_edit = function (row_idx, fn) {
+        let row = app.vue.rows[row_idx];
         app.vue.rows[row_idx]._state[fn] = "edit";
     };
 
@@ -92,6 +96,29 @@ let init = (app) => {
         // If I was not editing, there is nothing that needs saving.
     }
 
+    app.upload_file = function (event, row_idx) {
+        let input = event.target;
+        let file = input.files[0];
+        let row = app.vue.rows[row_idx];
+        if (file) {
+            let reader = new FileReader();
+            reader.addEventListener("load", function () {
+                // Sends the image to the server.
+                axios.post(upload_thumbnail_url,
+                    {
+                        contact_id: row.id,
+                        thumbnail: reader.result,
+                    })
+                    .then(function () {
+                        // Sets the local preview.
+                        row.thumbnail = reader.result;
+
+                    });
+            });
+            reader.readAsDataURL(file);
+        }
+    };
+
     // We form the dictionary of all methods, so we can assign them
     // to the Vue app in a single blow.
     app.methods = {
@@ -100,6 +127,7 @@ let init = (app) => {
         delete_contact: app.delete_contact,
         start_edit: app.start_edit,
         stop_edit: app.stop_edit,
+        upload_file: app.upload_file,
     };
 
     // This creates the Vue instance.

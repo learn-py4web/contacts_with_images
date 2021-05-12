@@ -44,6 +44,7 @@ def index():
         add_contact_url = URL('add_contact', signer=url_signer),
         delete_contact_url = URL('delete_contact', signer=url_signer),
         edit_contact_url = URL('edit_contact', signer=url_signer),
+        upload_thumbnail_url = URL('upload_thumbnail', signer=url_signer),
     )
 
 # This is our very first API function.
@@ -77,6 +78,15 @@ def edit_contact():
     id = request.json.get("id")
     field = request.json.get("field")
     value = request.json.get("value")
+    print(id, field, value)
     db(db.contact.id == id).update(**{field: value})
     time.sleep(1) # debugging
+    return "ok"
+
+@action('upload_thumbnail', method="POST")
+@action.uses(url_signer.verify(), db)
+def upload_thumbnail():
+    contact_id = request.json.get("contact_id")
+    thumbnail = request.json.get("thumbnail")
+    db(db.contact.id == contact_id).update(thumbnail=thumbnail)
     return "ok"

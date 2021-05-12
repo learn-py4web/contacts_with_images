@@ -22,6 +22,8 @@ def get_time():
 
 db.define_table('contact',
                 Field('first_name'),
-                Field('last_name'))
+                Field('last_name'),
+                Field('thumbnail', 'text'),
+                )
 
 db.commit()
