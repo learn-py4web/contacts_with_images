@@ -36,7 +36,7 @@ from .models import get_user_email
 url_signer = URLSigner(session)
 
 @action('index')
-@action.uses(url_signer, 'index.html')
+@action.uses('index.html', url_signer)
 def index():
     return dict(
         # This is the signed URL for the callback.
