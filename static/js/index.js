@@ -44,10 +44,11 @@ let init = (app) => {
                 id: response.data.id,
                 first_name: app.vue.add_first_name,
                 last_name: app.vue.add_last_name,
+                thumbnail: "",
                 _state: {first_name: "clean", last_name: "clean"},
                 _idx: n,
             };
-            app.vue.rows[n] = new_row;
+            app.vue.rows.push(new_row);
             app.reset_form();
             app.set_add_status(false);
         });
